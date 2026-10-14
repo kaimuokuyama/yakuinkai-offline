@@ -1,0 +1,10 @@
+{
+  "name": "役員会議事録 オフライン版",
+  "short_name": "役員会議事録",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f3f5f3",
+  "theme_color": "#315d35",
+  "lang": "ja",
+  "icons": []
+}
