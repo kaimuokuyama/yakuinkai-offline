@@ -111,8 +111,14 @@ function autoSave(){try{localStorage.setItem(CURRENT_KEY,JSON.stringify(getData(
 FIELD_IDS.forEach(k=>document.getElementById(k).addEventListener('input',autoSave));
 function saveDraft(){
  const d=getData();if(!d.minutes.trim()){alert('議事内容を入力してください。');return}
- let list=getList();d.id=crypto.randomUUID?crypto.randomUUID():String(Date.now());
- list.unshift(d);putList(list.slice(0,50));localStorage.setItem(CURRENT_KEY,JSON.stringify(d));
+ let list=getList();
+d.id=d.id|| (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()));
+const index=list.findIndex(x=>x.id===d.id);
+if(index>=0){list[index]=d;}
+else{list.unshift(d);}
+putList(list.slice(0,50));
+localStorage.setItem(CURRENT_KEY,JSON.stringify(d));
+
  document.getElementById('status').textContent='保存しました。保存した議事録は「保存した議事録を呼び出す」から再編集できます。';
 }
 function newDraft(){
