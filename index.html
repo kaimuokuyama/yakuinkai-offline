@@ -136,13 +136,54 @@ function printMinutes(){
  put('pSchool',d.schoolAttendees);put('pPta',d.ptaAttendees);put('pRoles',d.roles);put('pMinutes',d.minutes);
  autoSave();window.print();
 }
-function exportJson(){
- const d=getData();if(!d.minutes.trim()){alert('議事内容を入力してください。');return}
- const blob=new Blob([JSON.stringify({format:'minutes-offline-v1',records:[d]},null,2)],{type:'application/json'});
- const url=URL.createObjectURL(blob);const a=document.createElement('a');
- const safe=(d.date||'no-date').replace(/[^0-9-]/g,'');
- a.href=url;a.download='役員会議事録_'+safe+'.json';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
- document.getElementById('status').textContent='データを書き出しました。オンラインになったら、このJSONファイルをパソコンでGoogleスプレッドシートの議事録作成ツールに取り込みます。';
+
+ async function exportJson(){
+  const d = getData();
+  if(!d.minutes.trim()){
+    alert('議事録内容を入力してください。');
+    return;
+  }
+
+  const blob = new Blob(
+    [JSON.stringify({format:'minutes-offline-v1',records:[d]},null,2)],
+    {type:'application/json'}
+  );
+
+  const safe = (d.date || 'no-date').replace(/[^0-9-]/g,'');
+  const file = new File(
+    [blob],
+    '役員会議事録_' + safe + '.json',
+    {type:'application/json'}
+  );
+
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{
+      await navigator.share({
+        files:[file],
+        title:'議事録JSONを保存'
+      });
+      document.getElementById('status').textContent =
+        '共有メニューを開きました。保存先を選んでください。';
+    }catch(e){
+      if(e.name !== 'AbortError'){
+        document.getElementById('status').textContent =
+          '共有できませんでした。もう一度お試しください。';
+      }
+    }
+  }else{
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = file.name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    document.getElementById('status').textContent =
+      'JSONを書き出しました。保存先を確認してください。';
+  }
+}
+
 }
 (function init(){
  try{const saved=localStorage.getItem(CURRENT_KEY);if(saved){setData(JSON.parse(saved));}
